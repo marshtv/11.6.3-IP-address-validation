@@ -1,6 +1,6 @@
 #include <iostream>
-bool matchSymbols(std::string x)
-{
+
+bool matchSymbols(std::string x) {
     if (x.length() < 7 && x.length() > 15) {
         std::cout << "Unacceptable number of symbols!!!\n";
         return false;
@@ -12,10 +12,11 @@ bool matchSymbols(std::string x)
         char preChar = ' ';
         for (int i = 0; i < x.length(); i++) {
             if (x[i] != '.') {
-                if (x[i] < '0' && x[i] > '9') {
+                if (x[i] < '0' || x[i] > '9') {
                     std::cout << "Unacceptable symbols!!!\n";
                     return false;
                 }
+                preChar = ' ';
             } else if (x[i] == '.') {
                 if (preChar == '.') {
                     std::cout << "More then One Dot in a row!!!\n";
@@ -30,30 +31,62 @@ bool matchSymbols(std::string x)
             return false;
         }
     }
-
+    return true;
 }
 
 bool matchOctas(std::string x) {
     if (!matchSymbols(x)) {
         return false;
     } else {
-        char preDigit = ' ', prePreDigit = ' ';
+        int zeros = 0, digits = 0;
+        char pre = ' ';
         for (int i = 0; i < x.length(); i++) {
-            if (x[i] >= '0' && x[i] <= '9') {
-                if (prePreDigit < '0' && prePreDigit > '9') {
-                    if (preDigit < '0' && preDigit > '9') {
-                        prePreDigit = preDigit;
-                        preDigit = x[i];
-                    }
-                } else if (prePreDigit >= '0' && prePreDigit <= '9') {
-
+            if (x[i] > '0' && x[i] <= '9') {
+                if (digits == 3) {
+                    std::cout << "Too More Digits in Octa!!!\n";
+                    return false;
+                } else if (digits == 2 && zeros == 1 && pre != '0') {
+                    std::cout << "Prefix '0' ERROR!!!\n";
+                    return false;
+                } else if (zeros == 2) {
+                    std::cout << "Prefix '00' ERROR!!!\n";
+                    return false;
                 }
-            } else {
-                preDigit = ' ';
-                prePreDigit = ' ';
+                digits++;
+            } else if (x[i] == '0') {
+                if (digits == 3) {
+                    std::cout << "Too More Digits in Octa!!!\n";
+                    return false;
+                } else if (digits == 2 && zeros == 1 && pre != '0') {
+                    std::cout << "Prefix '0' ERROR!!!\n";
+                    return false;
+                } else if (zeros == 2) {
+                    std::cout << "Prefix '00' ERROR!!!\n";
+                    return false;
+                }
+                digits++;
+                zeros++;
+            } else { // x[i] == '.'
+                if (digits > 3) {
+                    std::cout << "Too More Digits in Octa!!!\n";
+                    return false;
+                } else if(zeros == 3) {
+                    std::cout << "Prefix '00' ERROR!!!\n";
+                    return false;
+                } else if (digits == 3 && zeros == 2 && pre != '0') {
+                    std::cout << "Prefix '0' ERROR!!!\n";
+                    return false;
+                } else if (digits == 2 && zeros == 1 && pre != '0') {
+                    std::cout << "Prefix '0' ERROR!!!\n";
+                    return false;
+                }
+                digits = 0;
+                zeros = 0;
             }
+            pre = x[i];
         }
     }
+    return true;
 }
 
 int get_Octa_By_Num(std::string x, int octaNum) {
@@ -88,7 +121,7 @@ int main() {
     std::cout << "Input IP-address:\n";
     std::getline(std::cin, ip);
 
-    if (matchInput(ip)) {
+    if (matchOctas(ip)) {
         for (int i = 0; i <= 3; i++) {
             if (get_Octa_By_Num(ip, i) > 254) {
                 std::cout << "octa_" << i << ": " << get_Octa_By_Num(ip, i) << "\n";
